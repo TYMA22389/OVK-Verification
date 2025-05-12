@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         OVK Verification
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Теперь администрация ОВК получает люлей! Галочка - для всех элит и инфоисточников!
 // @author       TYMA223
 // @match        https://ovk.to/*
@@ -17,6 +17,9 @@
             '/id281': true,
             '/pelmewkin': true
         },
+        verifiedGroups: {
+            '/anti_dimonchik064': true
+        },
         checkmarkHTML: `
             <img class="name-checkmark"
                  src="/assets/packages/static/openvk/img/checkmark.png"
@@ -27,6 +30,20 @@
     function addCheckmarks() {
         addHeaderCheckmark();
         addPostAuthorsCheckmarks();
+        addGroupCheckmark();
+        addPostGroupCheckmarks();
+    }
+
+    function addGroupCheckmark() {
+        const group = document.querySelector('h2');
+        if (!group) return;
+
+        const currentPath = window.location.pathname;
+        const isVerified = Object.keys(config.verifiedGroups).some(path => currentPath.startsWith(path));
+
+        if (isVerified && !group.querySelector('.name-checkmark')) {
+            group.insertAdjacentHTML('beforeend', config.checkmarkHTML);
+        }
     }
 
     function addHeaderCheckmark() {
@@ -39,6 +56,26 @@
         if (isVerified && !header.querySelector('.name-checkmark')) {
             header.insertAdjacentHTML('beforeend', config.checkmarkHTML);
         }
+    }
+
+    function addPostGroupCheckmarks() {
+        document.querySelectorAll('.post-author').forEach(groupBlock => {
+            // Находим элемент с именем автора
+            const groupName = groupBlock.querySelector('.post-author-name');
+            if (!groupName) return;
+
+            // Проверяем наличие существующей галочки
+            if (groupName.parentElement.querySelector('.name-checkmark')) return;
+
+            // Проверяем верификацию
+            const groupLink = groupBlock.querySelector('a[href^="/"]');
+            const groupPath = new URL(groupLink.href).pathname;
+
+            if (config.verifiedGroups[groupPath]) {
+                // Вставляем галочку сразу после имени
+                groupName.insertAdjacentHTML('afterend', config.checkmarkHTML);
+            }
+        });
     }
 
     function addPostAuthorsCheckmarks() {
