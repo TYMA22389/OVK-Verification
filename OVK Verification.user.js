@@ -22,8 +22,7 @@
         },
         checkmarkHTML: `
             <img class="name-checkmark"
-                 src="/assets/packages/static/openvk/img/checkmark.png"
-                 style="display:inline-block; width:18px; height:18px; margin-left:4px; vertical-align:middle;">
+                 src="/assets/packages/static/openvk/img/checkmark.png">
         `
     };
 
